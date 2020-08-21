@@ -5,33 +5,31 @@
 #ifndef __SSL_HH__
 #define __SSL_HH__
 
-#include <fcntl.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <stdio.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <resolv.h>
-#include <sysexits.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <pthread.h>
 #include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <pthread.h>
+#include <resolv.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sysexits.h>
+#include <unistd.h>
 
 #include "openssl/bio.h"
-#include "openssl/ssl.h"
 #include "openssl/err.h"
+#include "openssl/ssl.h"
 
-#define SSL_CA_CRT "./keys/ca/ca.crt"
-#define SSL_CLIENT_CRT "./keys/client.crt"
-#define SSL_CLIENT_KEY "./keys/private/client.key"
+#define CLCRT "keys/sslKeys/client-cert.pem"
+#define CLKEY "keys/sslKeys/client-key.pem"
+#define CACRT "keys/sslKeys/ca-cert.pem"
 
-
-
-#define SOCKET_BUFFER_SIZE (8+4*1024*1024)
+#define SOCKET_BUFFER_SIZE (8 + 4 * 1024 * 1024)
 
 /* action indicators */
 #define SEND_META (-1)
@@ -41,81 +39,77 @@
 
 using namespace std;
 
+class Ssl {
+private:
+    /* port number */
+    int hostPort_;
 
+    /* ip address */
+    char* hostName_;
 
-class Ssl{
-	private:
-		/* port number */
-		int hostPort_;
+    /* address structure */
+    struct sockaddr_in myAddr_;
 
-		/* ip address */
-		char* hostName_;
+    /* host socket */
+    SSL_CTX* ctx_;
+    SSL* ssl_;
 
-		/* address structure */
-		struct sockaddr_in myAddr_;
+    char buffer_[SOCKET_BUFFER_SIZE];
 
-		/* host socket */
-		SSL_CTX* ctx_;
-		SSL* ssl_;
-
-		char buffer_[SOCKET_BUFFER_SIZE];
-
-
-	public:
-
-		/*
+public:
+    /*
 		 * constructor: initialize sock structure and connect
 		 *
 		 * @param ip - server ip address
 		 * @param port - port number
 		 */
-		Ssl(char *ip, int port, int userID);
+    Ssl(char* ip, int port, int userID);
 
-		int hostSock_;
+    int hostSock_;
 
-		/*
+    /*
 		 * @ destructor
 		 */
-		~Ssl();
+    ~Ssl();
 
-		/*
+    /*
 		 * basic send function
 		 * 
 		 * @param raw - raw data buffer_
 		 * @param rawSize - size of raw data
 		 */
-		int genericSend(char * raw, int rawSize);
+    int genericSend(char* raw, int rawSize);
 
-		/*
+    /*
 		 * data download function
 		 *
 		 * @param raw - raw data buffer
 		 * @param rawSize - the size of data to be downloaded
 		 * @return raw
 		 */
-		int genericDownload(char *raw, int rawSize);
+    int genericDownload(char* raw, int rawSize);
 
-		void closeConn();
+    void closeConn();
 
-		/*
+    /*
 		 * metadata send function
 		 *
 		 * @param raw - raw data buffer_
 		 * @param rawSize - size of raw data
 		 *
 		 */
-		int sendMeta(char * raw, int rawSize);
+    int sendMeta(char* raw, int rawSize);
 
-		/*
+    /*
 		 * data send function
 		 *
 		 * @param raw - raw data buffer_
 		 * @param rawSize - size of raw data
 		 *
-		 */ 
-		int sendData(char * raw, int rawSize); 
+		 */
+    int sendData(char* raw, int rawSize);
 
-		/*
+    /*
 		 * status recv function
 		 *
 		 * @param statusList - return int list
@@ -123,9 +117,9 @@ class Ssl{
 		 *
 		 * @return statusList
 		 */
-		int getStatus(bool * statusList, int* numOfShare); 
+    int getStatus(bool* statusList, int* numOfShare);
 
-		/*
+    /*
 		 * initiate downloading a file
 		 *
 		 * @param filename - the full name of the targeting file
@@ -133,18 +127,17 @@ class Ssl{
 		 *
 		 *
 		 */
-		int initDownload(char * filename, int namesize);
+    int initDownload(char* filename, int namesize);
 
-		/*
+    /*
 		 * download a chunk of data
 		 *
 		 * @param raw - the returned raw data chunk
 		 * @param retSize - the size of returned data chunk
 		 * @return raw 
 		 * @return retSize
-		 */ 
-		int downloadChunk(char* raw, int* retSize);
-
+		 */
+    int downloadChunk(char* raw, int* retSize);
 };
 
 #endif

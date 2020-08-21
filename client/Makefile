@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -g -Wall -fno-operator-names -Wno-write-strings  -Wunreachable-code -Wshadow -DLINUX -std=c++0x
+CFLAGS = -g -Wall -fno-operator-names -Wno-write-strings  -Wunreachable-code -Wshadow -DLINUX -std=c++1z -fsanitize=leak
 LIBS = -lcrypto -lssl -lpthread 
 INCLUDES =-I./utils -I./lib/cryptopp -I./comm -I./coding -I./chunking -I./keyClient  
 MAIN_OBJS = ./chunking/chunker.o ./utils/CryptoPrimitive.o ./coding/encoder.o ./comm/uploader.o ./utils/socket.o ./comm/downloader.o ./coding/decoder.o ./keyClient/exchange.o ./coding/aont.o ./utils/ssl.o
